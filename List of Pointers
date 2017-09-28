@@ -1,0 +1,344 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+long ApenasInt();
+void Copia();
+void Inserir();
+void Excluir();
+void Free();
+void LimparTela();
+void ListarTodos();
+void Malloc();
+int Menu();
+void Ordenar();
+void OrdenaTodos();
+long PosValida();
+void Realloc();
+
+typedef struct
+{
+    int PosAtual;
+    int TamVet;
+    int *VetAux;
+    int *VetAuxOrd;
+    }Lista;
+
+long ApenasInt(){
+    char buffer_de_entrada[64];
+    char* onde_a_funcao_de_conversao_parou;
+
+    while (1) {
+        fgets(buffer_de_entrada, 64, stdin);
+        long numero_lido = strtol(buffer_de_entrada, &onde_a_funcao_de_conversao_parou, 0);
+
+        if(numero_lido==9223372036854775807)
+            printf("\nNumero não suportado - Maior que a capacidade do Long Int\n\n");
+
+   
+        else if ((numero_lido == 0 && onde_a_funcao_de_conversao_parou == buffer_de_entrada)
+            || *onde_a_funcao_de_conversao_parou != '\n') {
+            printf("Número inválido. Digite novamente.\n");
+            continue;
+        } else {
+            return numero_lido;
+        }
+    }
+
+}
+
+void Copia(Lista *vet, int pos)
+{
+    if(vet[pos].VetAuxOrd==NULL)
+    vet[pos].VetAuxOrd=(int*)malloc(vet[pos].TamVet*sizeof(int));
+
+    for(int i=0; i<vet[pos].TamVet;i++)
+        vet[pos].VetAuxOrd[i]=vet[pos].VetAux[i];
+}
+
+void Inserir(Lista *vet, int pos)
+{
+    pos--;
+    if(vet[pos].VetAux==NULL)
+    {
+        printf("Estura principal sem estrutura auxiliar\n");
+        Malloc(vet, pos);   
+    }
+    else if(vet[pos].PosAtual<vet[pos].TamVet)
+    {
+        printf("Informe elemento a ser inserido na estrutura principal\n");
+        vet[pos].VetAux[vet[pos].PosAtual]=ApenasInt();
+        vet[pos].PosAtual++;
+    }
+    else if(vet[pos].PosAtual==vet[pos].TamVet)
+    {
+        printf("\n\n\nEstrutura auxiliar sem memória. Se deseja adicionar mais elementos utilize a opção 6\n\n\n\n\n\n");
+    }
+}
+
+void Excluir(Lista *vet, int pos, int elemento)
+{
+    pos--;
+    int i,j, SemElemento=0;
+    if(vet[pos].TamVet==0)
+    {
+        printf("\n\nSem estrutura auxiliar\n\n");
+    }
+    else if(elemento==vet[pos].VetAux[vet[pos].PosAtual])
+    {
+        vet[pos].PosAtual--;
+    }
+    else
+
+    for(i=0;i<vet[pos].PosAtual;i++)
+    {
+        if(vet[pos].VetAux[i]==elemento)
+        {
+            for(j=i;j<vet[pos].PosAtual;j++)
+            {
+                vet[pos].VetAux[j]=vet[pos].VetAux[j+1];
+            }
+            vet[pos].PosAtual--;
+            SemElemento=1;
+            printf("Elemento excluido\n");
+            break;
+        }
+
+    }
+    if(SemElemento=0)
+        printf("Elemento informado não existente\n");
+
+   
+}
+
+void Free(Lista *vet, int *PointerAll)
+{
+    for(int i=0;i<10;i++){
+        free(vet[i].VetAux);
+        free(vet[i].VetAuxOrd);
+    }
+    free(PointerAll);
+    system("clear");
+}
+
+void LimparTela()
+{
+    system("clear");
+}
+
+void ListarTodos(Lista *vet)
+{
+    int i, j;
+    for(i=0;i<10;i++){
+        printf("Estrutura principal: %i \n",i+1);
+        printf("Tamanho da estrutura auxiliar: %i\n", vet[i].TamVet);
+        if(vet[i].TamVet > 0){
+            printf("Elementos da estrutura auxiliar:\n");
+            for(j=0;j <= vet[i].PosAtual-1; j++){
+                printf(" - %i -\n", vet[i].VetAux[j]);
+            }
+        }
+        printf("__________________________________\n\n ");
+    }
+}
+
+void Malloc(Lista *vet, int pos)
+{
+   
+    int Posvalida;
+    printf("Informe o Tamanho a ser Alocado\n");
+    Posvalida=ApenasInt();
+    vet[pos].TamVet=Posvalida;
+    vet[pos].VetAux=(int*)malloc(vet[pos].TamVet*sizeof(int));
+}
+
+int Menu()
+{
+    int op;
+    printf("Digite as opção desejada\n");
+    printf("1 - [Inserir]\n");
+    printf("2 - [Listar]\n");
+    printf("3 - [Listar em Ordem]\n");
+    printf("4 - [Listar Todos em Ordem]\n");
+    printf("5 - [Excluir um elemento]\n");
+    printf("6 - [Aumentar tamanho da estrutura auxiliar]\n");
+    printf("7 - [Sair]\n");
+    printf("8 - [Limpar Tela]\n\n");
+    op=PosValida();
+    return op;
+}
+
+void Ordenar(Lista *vet, int pos)
+{   
+    pos--;
+    int atual, i , j;
+    if(vet[pos].PosAtual==0)
+        printf("Estrutura Vazia\n\n\n\n\n\n");
+    else if(vet[pos].PosAtual==1){
+        printf("Estrutura Auxiliar:\n");
+        printf(" - %d -\n\n\n\n\n\n",vet[pos].VetAux[0] );
+    }
+    else {
+        Copia(vet, pos);
+        for(i=1;i <vet[pos].PosAtual;i++){
+            atual=vet[pos].VetAuxOrd[i];
+            for(j=i - 1; (j>=0)&& (atual<vet[pos].VetAuxOrd[j]); j--){
+                vet[pos].VetAuxOrd[j+1]=vet[pos].VetAuxOrd[j];
+            }
+            vet[pos].VetAuxOrd[j+1]=atual;
+        }
+        printf("Estrutura Auxiliar %d ordenada:\n", pos + 1);
+        for(i=0;i<vet[pos].PosAtual;i++)
+            printf(" - %d -\n", vet[pos].VetAuxOrd[i] );
+            printf("\n\n\n\n\n\n" );
+    }
+}
+
+void OrdenaTodos(Lista *vet, int *PointerAll)
+{
+    int Total=0;
+    int i=0, j=0, Itera=0, atual;
+    for(int i=0;i<10;i++)
+        Total=Total + vet[i].PosAtual;
+    if(Total==0)
+        printf("Nenhum elemento inserido\n\n\n\n\n\n");
+    else{
+    PointerAll=(int*)realloc(PointerAll,Total*sizeof(int));
+    for(i=0;i<10;i++){
+        for(j=0; j<vet[i].PosAtual;j++){
+            PointerAll[Itera]=vet[i].VetAux[j];
+            Itera++;
+        }
+    }
+    for(i=1;i <Total;i++){
+            atual=PointerAll[i];
+            for(j=i - 1; (j>=0)&& (atual<PointerAll[j]); j--){
+                PointerAll[j+1]=PointerAll[j];
+            }
+            PointerAll[j+1]=atual;
+        }
+    printf("Todos elementos inseridos ordenados:\n");
+        for(i=0;i<Total;i++)
+            printf(" - %d -\n", PointerAll[i] );
+            printf("\n\n\n\n\n\n" );
+    }
+}
+
+long PosValida(){
+    char buffer_de_entrada[64];
+    char* onde_a_funcao_de_conversao_parou;
+
+    while (1) {
+        fgets(buffer_de_entrada, 64, stdin);
+        long numero_lido = strtol(buffer_de_entrada, &onde_a_funcao_de_conversao_parou, 0);
+
+        if(numero_lido==9223372036854775807)
+            printf("\nNumero não suportado - Maior que a capacidade do Long Int\n\n");
+
+   
+        else if ((numero_lido == 0 && onde_a_funcao_de_conversao_parou == buffer_de_entrada)
+            || *onde_a_funcao_de_conversao_parou != '\n' || numero_lido<1 || numero_lido >10) {
+            printf("Número inválido. Digite novamente.\n");
+            continue;
+        } else {
+            return numero_lido;
+        }
+    }
+
+}
+
+void Realloc(Lista *vet, int pos, int extra){
+    pos--;
+    int Total=vet[pos].TamVet;
+    Total=Total+extra;
+    if(vet[pos].VetAux==NULL){
+        printf("Estrutura principal sem estrutura auxiliar\n\n\n\n\n");
+    }
+    else {
+        vet[pos].VetAux=(int*)realloc(vet[pos].VetAux,Total*sizeof(int));
+        vet[pos].VetAuxOrd=(int*)realloc(vet[pos].VetAuxOrd,Total*sizeof(int));
+        vet[pos].TamVet=Total;
+    }
+}
+
+int main()
+{
+   
+    int op;
+    int sair = 0;
+    int Posvalida;
+    int num;
+    int *PointerAll;
+    int i;
+
+    Lista lista_principal[10];
+    PointerAll=(int*)malloc(10*sizeof(int));
+
+    PointerAll=NULL;
+
+    for(int i=0;i<10;i++)
+    {
+        lista_principal[i].VetAux=NULL;
+        lista_principal[i].TamVet=0;
+        lista_principal[i].PosAtual=0;
+        lista_principal[i].VetAuxOrd=NULL;
+    }
+   
+    while (!sair){
+        op = Menu();
+        switch (op){
+           
+            case 1:{ //inserir
+                printf("Informe Posição da Estrutura Principal\n");
+                Posvalida=PosValida();
+                Inserir(lista_principal, Posvalida);
+                break;
+            }
+            case 2:{ //listar todos
+                ListarTodos(lista_principal);
+                break;
+            }
+            case 3:{ //lista estrutura auxiliar
+                printf("Infome qual estrutura deve ser ordenada\n");
+                Posvalida=PosValida();
+                Ordenar(lista_principal, Posvalida);
+                break;
+
+            }
+            case 4:{ // Ordena todos os elementos
+                OrdenaTodos(lista_principal, PointerAll);
+                break;
+            }
+            case 5:{ // Exclui um elemento
+                printf("Informe a posição da estrutura principal a ter o elemento excluido\n");
+                Posvalida=PosValida();
+                printf("Informe o elemento a ser excluido\n");
+                num=ApenasInt();
+                Excluir(lista_principal ,Posvalida, num);
+                break;
+            }
+            case 6:{ // Realloc
+                printf("Informe a posição de estrutura principal a ter tamanho aumentado\n");
+                Posvalida=PosValida();
+                printf("Informe tamanho extra dessa estrutura auxiliar\n");
+                num=ApenasInt();
+                Realloc(lista_principal, Posvalida, num);
+                break;
+            }
+            case 7:{//sair
+                Free(lista_principal, PointerAll);
+                sair =1;
+                break;
+            }
+            case 8:{ //limpar a tela
+                LimparTela();
+                break;
+            }
+            default:{
+                printf("Opcao inválida\n\n\n");
+
+            }
+        }  
+    } 
+    return 0;   
+}
